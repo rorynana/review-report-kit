@@ -1,6 +1,6 @@
 # 리뷰 분석 리포트 키트
 
-올리브영 리뷰를 모으고, 그 리뷰로 11쪽 분석 리포트 PDF 를 만드는 키트입니다. 두 단계로 씁니다.
+올리브영·화해 리뷰를 모으고, 그 리뷰로 11쪽 분석 리포트 PDF 를 만드는 키트입니다. 리포트 구성은 표지, 01 핵심 요약, 02 한눈에 보기, 03 강점, 04 충성도, 05 키워드, 06 세그먼트, 07 성분, 08 리스크, 09 심층 이슈, 10 확인된 사실입니다. 두 단계로 씁니다.
 
 ## 1. 리뷰 모으기 (Node)
 
@@ -31,12 +31,13 @@ collect-hwahae.js (화해) 가 만드는 파일
 
 - build_report.py : 레이아웃과 렌더
 - report_style.css : 디자인
-- report_data.json : 예시 데이터(토니모리 세라마이드 모찌 토너). 새 제품은 이 키 구조 그대로 값만 바꿉니다
+- report_data.json : 예시 데이터(토니모리 세라마이드 모찌 토너, 2026-10-19 수집). 새 제품은 이 키 구조 그대로 값만 바꿉니다
+- photos/ : 예시의 제품 사진과 포토리뷰 사진. 새 제품은 oliveyoung.json 의 image 주소로 제품 사진을 받아 같은 식으로 경로를 적습니다
 - nousgirl_b64.txt : 표지 그림
 
 디자인은 코드에 고정돼 있고, 내용은 report_data.json 하나만 바꾸면 됩니다.
 
-실행: python build_report.py 새데이터.json 리포트.pdf
+실행: python build_report.py 새데이터.json 리포트.pdf  (리포트.pdf 는 전체 경로로 적습니다)
 
 새데이터.json 은 reviews.csv, oliveyoung.json, hwahae.json 세 파일의 숫자로만 채웁니다.
 

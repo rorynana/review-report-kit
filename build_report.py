@@ -31,6 +31,8 @@ for _i, _k in enumerate(_present, 1):
 import base64
 def img_uri(ph, maxw=640):
     path = (ph or {}).get("path")
+    if path and not os.path.exists(path) and os.path.exists(os.path.join(SC, path)):
+        path = os.path.join(SC, path)   # 키트 안 상대경로(photos/...)도 찾는다
     if not path or not os.path.exists(path):
         return None
     try:
