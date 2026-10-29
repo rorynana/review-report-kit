@@ -1,0 +1,8 @@
+{
+  "name": "review-report-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "올리브영 리뷰 수집과 리뷰 분석 리포트",
+  "main": "collect.js",
+  "dependencies": { "puppeteer-core": "^25.16.0" }
+}
