@@ -1,7 +1,8 @@
 // 올리브영 리뷰 수집 키트
 // 사용법: node collect.js <상품 페이지 주소> [건수]
 // 평소 크롬을 새 프로필로 따로 켜고 거기에 붙어서, 상품 페이지 안에서 리뷰를 불러온다.
-// 도움순 N건 + 별점 낮은순 N건, 겹치면 한 번만. 결과는 이 폴더의 reviews.csv.
+// 도움순 N건 + 별점 낮은순 N건, 겹치면 한 번만. 결과는 실행한 폴더의 reviews.csv.
+// 제품 전체 별점 분포·리뷰 수, 올리브영 AI 요약, 제품명·대표 이미지는 oliveyoung.json.
 const puppeteer = require('puppeteer-core');
 const { spawn } = require('child_process');
 const path = require('path');
@@ -97,6 +98,24 @@ async function blocked(page) {
         cursor = { cursorId: d.nextCursorId, cursorScore: d.nextCursorScore, cursorCount: d.nextCursorCount };
       }
     }
+
+    // 제품 전체 수치: 별점 분포·총 리뷰 수, 올리브영 AI 요약, 제품명·대표 이미지
+    const getJson = u => page.evaluate(async x => { try { const r = await fetch(x); return r.ok ? await r.json() : null; } catch { return null; } }, u);
+    const st = (await getJson(`https://m.oliveyoung.co.kr/review/api/v2/reviews/${GOODS_NO}/stats`))?.data || {};
+    await sleep(DELAY_MS);
+    const sm = (await getJson(`https://m.oliveyoung.co.kr/review/api/v1/reviews/${GOODS_NO}/summary`))?.data || {};
+    const rd = st.ratingDistribution || {};
+    const dist = {}; for (const x of rd.ratingStatDtos || []) dist[x.rating] = x.percentage;
+    const features = []; for (let i = 1; i <= 3; i++) if (sm[`feature${i}Title`]) features.push({ title: sm[`feature${i}Title`], desc: sm[`feature${i}Description`] || '' });
+    const meta = await page.evaluate(() => ({
+      title: (document.querySelector('meta[property="og:title"]') || {}).content || document.title,
+      image: (document.querySelector('meta[property="og:image"]') || {}).content || null }));
+    const product = { source: 'oliveyoung', goodsNo: GOODS_NO, url: PAGE_URL, collectedAt: new Date().toISOString().slice(0, 10),
+      goodsName: st.goodsName || meta.title, image: meta.image,
+      totalReviewCount: st.reviewCount ?? null, avgRating: rd.averageRating ?? null, ratingDistributionPct: dist,
+      aiSummary: { positiveRatio: sm.positiveRatio ?? null, negativeRatio: sm.negativeRatio ?? null, features } };
+    fs.writeFileSync(path.join(process.cwd(), 'oliveyoung.json'), JSON.stringify(product, null, 2), 'utf8');
+    console.log(`제품: ${product.goodsName} / 전체 ★${product.avgRating} / 리뷰 ${product.totalReviewCount}건 / AI 요약 긍정 ${product.aiSummary.positiveRatio}%`);
 
     const esc = v => { const s = String(v ?? ''); return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
     const yn = b => (b ? 'Y' : 'N');
